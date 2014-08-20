@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+
+//VARIABLES GLOBALES
+
+listaContactos[100];//arreglo de structs para guardar una lista de contactos
+int ultimoCont;//posicion del ultimo contacto introducido
+
+struct contacto{
+	char nombre[50];
+	char ip[16];
+	int puerto;
+	}
+
+/*Funció principal: llama a la funcion conectar y a la funcion menu*/ 
+main(){
+	conectar();
+	menu();
+}
+
+//funcion conectar que verifica si hay coneccion con el servidor
+conectar(){
+	printf("Conectando con el servidor...\n\n");
+	//Definicion de variables y estructuras
+	struct sockaddr_in servidor;
+	char ip[16];
+	int sock, numbytes,puerto;
+	char buf[1024];
+	char enviar[1024];
+	//system("clear");
+	printf("Ingrese la ip del servidor\n");
+	scanf("%s",ip);
+	printf("Ingrese el puerto de conexion\n");
+	scanf("%d",&puerto);
+
+ //Llamada a la funcion socket que recibe como parametros al dominio donde se realiza la conexion, el tipo de socket que se va crear y por ultimo el protocolo que se va utilizar. Sock es el nombre que se le asigno al socket que se creara.
+
+	if ((sock=socket(AF_INET, SOCK_STREAM, 0))==-1){
+		printf("socket() error\n");
+		exit(-1);}
+
+ //Asignacion de valores para los espacios del struct servidor
+	servidor.sin_family = AF_INET;
+	servidor.sin_port = htons(puerto);
+	servidor.sin_addr.s_addr=inet_addr(ip);
+	bzero(&(servidor.sin_zero),8);
+
+//La función connect() inicia la conexión con el servidor remoto, por parte del cliente. Recibe como parametros el identificador del socket devuelto por la función socket(), una estructura sockaddr que contiene la dirección IP y número depuerto del destino y por ultimo debe ser inicializado al tamaño de la estructura servidor.
+//pasada como parámetro.
+	if(connect(sock, (struct sockaddr *)&servidor,sizeof(struct sockaddr))==-1){
+		printf("connect() error\n");
+		close(sock);
+		exit(-1);}
+ //Recibir mensaje de bienvenida //con la lista de contactos del servidor
+	if ((numbytes=recv(sock,buf,1024,0)) == -1){
+		printf("Error en recv() \n");
+		exit(-1);}
+	printf("%s\n",buf);//imprime la lista de contactos recivida 
+	/*usuariosservidor(buff)*/
+//Ciclo para enviar y recibir mensajes
+	if(1){
+		printf("Conectado con el servidor Correctamente\n\n");
+	}
+	//close(sock);
+}
+
+/*Funcion muestra el MENU PRINCIPAL con las opciones disponibles para los usuarios finales*/
+int menu(){
+	int opc;
+	printf("\n\nEscriba el número de la acción que desea ejecutar y presione Enter...\n1.Agregar Contactos\n2.Enviar Mensaje\n3.Recibir mensaje\n4.Ver lista de contactos\n5.Salir\n");
+	scanf("%d", &opc);
+	if (opc==1){
+		//datosContacto();
+		}
+	else if(opc==4){
+		//imprimeContactos();
+		}
+	else if(opc==3){
+		//fork_();
+		}
+	else if(opc==2){
+		//enviarMensaje();
+		}
+	else if(opc=5){
+		printf("Gracias, adios");
+		return 0;}
+	return 0;
+}
+
