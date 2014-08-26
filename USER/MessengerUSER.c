@@ -14,6 +14,15 @@ struct contacto{
 	char ip[100];
 	char puerto[100];
 };
+
+//estructura con la informacion para el envio de msj atraves del servidor
+struct paquete{
+	struct contacto destinatario;
+	char msj[100];
+	FILE archivo;
+};
+	
+	
 //VARIABLES GLOBALES
 struct contacto agenda[100]; //struct de structs para guardar una lista de contactos
 int ultimoCont= 0; //posicion del ultimo contacto introducido
@@ -22,11 +31,11 @@ char *ip, *puerto; //informacion del programa usuario
 
 //"Enviar"
 //envia el mensajes; funcion de CLIENTE dentro del usuario
-int cliente(){
+int cliente(struct contacto destino){
 	char *puerto, *ip;//variables para la dirrecion IP y # de puerto del SERVIDOR DEL PROGRAMA O SERVICIO
 	puerto = agenda[0].puerto;
 	ip = agenda[0].ip;
-	struct contacto destino;//struct con la informacion del DESTINATARIO FINAL
+	//struct con la informacion del DESTINATARIO FINAL
 	
 	int socket_conex; // ID del socket de conexion
 	int conexion; //boolean para verificar la conexion
@@ -49,7 +58,7 @@ int cliente(){
 		exit(1);
 	}
 
-	conexion = send(socket_conex,argv[0],strlen(argv[0])+1,0); 
+	conexion = send(socket_conex,destino.nombre,strlen(destino.nombre)+1,0); 
 	//Verifica la conexion con el socket, para el envio de mensajes
 	if(conexion <0){  
 		perror("Falló la conexion. Lo sentimos msj no enviado"); 
@@ -57,10 +66,9 @@ int cliente(){
 		exit(1);
 	}
 
-	char msj[num]; //mensaje del usuario (emisor)
+	char msj[100]; //mensaje del usuario (emisor)
 	printf("\033[01;33mMsj por enviar: ");//Solicita al usuario el mensaje que desea enviar
-	scanf(" %[^\n]", msj);	//Lee el mensaje ingresado y lo guarda en la variable mensaje
-	
+	scanf(" %[^\n]", 100);	//Lee el mensaje ingresado y lo guarda en la variable mensaje
 	
 	//Proceso para enviar el mensaje
 	conexion = send(socket_conex, msj, strlen(msj)+1, 0);
@@ -76,13 +84,13 @@ int cliente(){
 
 //"ESCUCHAR"
 //recibe mensajes; funcion de SERVIDOR dentro del usuario
-int servidor (char *argv[]){
+int servidor (){
 	int socket_conex; //ID del socket de conexion
 	//boolean para verificar la conexion, largo de la direccion IP
 	//largo del mensaje
 	int conexion, clienteAddrLen, msjLen; 
 	struct sockaddr_in clienteAddr, servidorAddr;
-	char msj[num]; //mensaje recivido
+	char msj[100]; //mensaje recivido
 //-----------------------------------------------------------------------------------
 //crea el socket
 	socket_conex = socket(AF_INET, SOCK_STREAM, 0); //Pide el socket TCP/IP
@@ -109,9 +117,9 @@ int servidor (char *argv[]){
 			exit(1);
 		}
 		
-		memset(msj,0x0,num); //inicia la linea de escucha
+		memset(msj,0x0,100); //inicia la linea de escucha
 
-		msjLen = recv(conexion, msj, num, 0); // Espera que lleguen todos los datos
+		msjLen = recv(conexion, msj, 100, 0); // Espera que lleguen todos los datos
 		if(msjLen < 0){
 			perror("Error en la recepción de datos");
 			exit(1);
@@ -121,7 +129,7 @@ int servidor (char *argv[]){
 		// ----------------
 
 		//Recibe los mensajes enviados
-		msjLen = recv(conexion, msj, num, 0); // Espera que lleguen todos los datos
+		msjLen = recv(conexion, msj, 100, 0); // Espera que lleguen todos los datos
 		if(msjLen < 0){
 			perror("Error en la recepcion de datos");
 			exit(1);
@@ -185,20 +193,21 @@ main(){
 			while(0){
 				//servidor_recibe
 				//escucha();
-				Servidor();
+				servidor();
 				}
 		}
 		else{
 			while(0){
 				//cliente_envia
 				//menuPrincipal();
+				int opcion;
 				printf("\033[01;37m\n **** Menu principal ****\n\n");
 				printf("1. Enviar mensaje\n");
 				printf("2. Ver amigos\n");
 				printf("4. Salir\n");
 				printf("\n Ingrese el número de la opcion deseada: ");
 				scanf("%d",&opcion); // lee la opcion que el usuario ingreso y lo guarda en la variable opcion
-				cliente()
+				//cliente();
 				}
 		}
 	}
